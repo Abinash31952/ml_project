@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 import os
 
-app = Flask(__name__)
+app = Flask(__name__)  # ✅ Fix: use __name__
 
 @app.route('/', methods=['GET'])
 def home():
@@ -23,14 +23,13 @@ def predict():
     ])
 
     # ⚠ TEMPORARY: Dummy prediction logic
-    # This is a placeholder until model.pkl and scaler.pkl are available
-    if features[1] > 125:  # e.g., Glucose > 125
+    if features[1] > 125:  # Glucose level check
         result = "Diabetic"
     else:
         result = "Not Diabetic"
 
     return jsonify({'prediction': result})
 
-if _name_ == '_main_':
+if __name__ == '__main__':  # ✅ Fix: use __name__ and __main__
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
