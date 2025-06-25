@@ -1,31 +1,36 @@
 from flask import Flask, request, jsonify
-import joblib
+import pickle
 import numpy as np
+import os
 
-# Load model and scaler
-model = joblib.load('diabetes_model.pkl')
-scaler = joblib.load('scaler.pkl')
+app = Flask(_name_)
 
-app = Flask(__name__)
+# Load model
+model = pickle.load(open('model.pkl', 'rb'))
+scaler = pickle.load(open('scaler.pkl', 'rb'))
+
+@app.route('/', methods=['GET'])
+def home():
+    return "✅ ML API is live and ready!", 200
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    features = [data.get(col) for col in ['Pregnancies', 'Glucose', 'BloodPressure', 
-                                          'SkinThickness', 'Insulin', 'BMI', 
-                                          'DiabetesPedigreeFunction', 'Age']]
-    
-    # Scale input
-    input_scaled = scaler.transform([features])
-    
-    # Predict
-    prediction = model.predict(input_scaled)[0]
-    
-    # Return readable result
-    result = 'Diabetes Detected' if prediction == 1 else 'No Diabetes Detected'
+    data = request.get_json()
+    features = np.array([[
+        data['Pregnancies'],
+        data['Glucose'],
+        data['BloodPressure'],
+        data['SkinThickness'],
+        data['Insulin'],
+        data['BMI'],
+        data['DiabetesPedigreeFunction'],
+        data['Age']
+    ]])
+    scaled = scaler.transform(features)
+    prediction = model.predict(scaled)
+    result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
     return jsonify({'prediction': result})
 
-import os
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+if _name_ == '_main_':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
