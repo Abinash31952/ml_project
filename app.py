@@ -25,6 +25,7 @@ def predict():
     result = 'Diabetes Detected' if prediction == 1 else 'No Diabetes Detected'
     return jsonify({'prediction': result})
 
+import os
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port, debug=True)
