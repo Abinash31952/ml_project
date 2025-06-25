@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
-import pickle
 import numpy as np
+import pickle
 import os
 
 app = Flask(__name__)
 
-# ✅ Load trained model and scaler
-model = pickle.load(open('model.pkl', 'rb'))
-scaler = pickle.load(open('scaler.pkl', 'rb'))
+# ✅ Load your actual model and scaler
+model = pickle.load(open("model.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
 
 @app.route('/', methods=['GET'])
 def home():
@@ -16,6 +16,8 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
+
+    # 📦 Convert the input to a NumPy array
     features = np.array([[
         data['Pregnancies'],
         data['Glucose'],
@@ -27,10 +29,12 @@ def predict():
         data['Age']
     ]])
 
+    # 🧼 Scale input and predict using model
     scaled = scaler.transform(features)
     prediction = model.predict(scaled)
-    result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
 
+    # 🩺 Return prediction result
+    result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
     return jsonify({'prediction': result})
 
 if __name__ == '__main__':
